@@ -6,11 +6,14 @@ Herbivore::Herbivore(Game* g, Vector2 p, Color c, float tr, float v)
   , agent {Agent(tr)} 
   , game {g}
   , velocity {v}
-  , direction {}
+  , direction {0.0f, 0.0f}
+  , hunger {100.0f}
+  , hunger_decrement {1.0f}
 {
   //Create actions
   create_action();
-
+  //Craete Condition
+  create_condition();
   // Create behvaior tree
   create_behavior();
 }
@@ -19,19 +22,9 @@ Herbivore::~Herbivore() {}
 
 void
 Herbivore::update() {
-// wrapt around the screen
-  if (actor.position.y < 0.0f) {
-    actor.position.y = game->win_h;
-  }
-  if (actor.position.y > game->win_h) {
-    actor.position.y = 0.0f;
-  }
-  if (actor.position.x < 0.0f) {
-    actor.position.x = game->win_w;
-  }
-  if (actor.position.x > game->win_w) {
-    actor.position.x = 0.0f;
-  }
+  wrap_around();
+  diminish_hunger();
+  std::cout << "Hunger: " << hunger << std::endl;
 }
 
 void
@@ -49,12 +42,6 @@ Herbivore::create_action() {
   move_to_direction = new Action([this](){
     actor.color = RED;
     std::cout << "is moving..." << std::endl;
-    std::cout << "velocity: " << velocity << std::endl;
-    std::cout << "frame dt: " << game->frame_delta << std::endl;
-    std::cout << "dir x:" << direction.x << std::endl;
-    std::cout << "dir y:" << direction.y << std::endl;
-    std::cout << "pos x:" << actor.position.x << std::endl;
-    std::cout << "pos y:" << actor.position.y << std::endl;
     static float ms = 0.0f;
     static float move_duration = (float)GetRandomValue(1, 4);
 
@@ -91,7 +78,6 @@ Herbivore::create_action() {
     static float ms = 0.0f;
     static float wait_limit = (float)GetRandomValue(1, 4);
     std::cout << "is idling..." << std::endl;
-    std::cout << "ms: " << ms << std::endl;
 
     if (ms >= wait_limit) {
       ms = 0.0f;
@@ -106,13 +92,54 @@ Herbivore::create_action() {
 }
 
 void
+Herbivore::create_condition() {
+  is_hungry = new Condition([this](){
+    if (hunger <= hunger_threshold) {
+      std::cout << "HUNGRY!! >:(" << std::endl;
+      actor.color = BROWN;
+      return true;
+    }
+
+    return false;
+  });
+}
+
+void
 Herbivore::create_behavior() {
   agent.btb = new BehaviorTreeBuilder();
   agent.btb->root(new Selector())
     ->composite(new Sequence())
+      ->decorator(new Invert())
+        ->condition(is_hungry)
+        ->end()
       ->action(set_random_directon)
       ->action(move_to_direction)
-      ->action(idle);
+      ->action(idle)
+      ->end()
+    ->composite(new Sequence())
+      ->condition(is_hungry);
 
   agent.bt = agent.btb->create_tree();
+}
+
+void
+Herbivore::wrap_around() {
+  // wrapt around the screen
+  if (actor.position.y < 0.0f) {
+    actor.position.y = game->win_h;
+  }
+  if (actor.position.y > game->win_h) {
+    actor.position.y = 0.0f;
+  }
+  if (actor.position.x < 0.0f) {
+    actor.position.x = game->win_w;
+  }
+  if (actor.position.x > game->win_w) {
+    actor.position.x = 0.0f;
+  }
+}
+
+void
+Herbivore::diminish_hunger() {
+  hunger -= hunger_decrement * game->frame_delta * agent.tick_rate;
 }

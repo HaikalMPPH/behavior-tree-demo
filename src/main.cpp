@@ -3,7 +3,7 @@
 
 int main() {
   std::srand(std::time(nullptr));
-  Game game(1366, 768);
+  Game game(1600, 900);
 
   game.init();
   game.run();

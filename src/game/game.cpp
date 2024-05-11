@@ -14,11 +14,13 @@ Game::~Game() {
 }
 
 
-void Game::init() {
+void 
+Game::init() {
   InitWindow(win_w, win_h, "Behavior Tree Demo");
 }
 
-void Game::run() {
+void 
+Game::run() {
   while(!WindowShouldClose()) {
     frame_delta = GetFrameTime();
 
@@ -30,15 +32,18 @@ void Game::run() {
   CloseWindow();
 }
 
-void Game::update() {
+void 
+Game::update() {
   herb1.update();
 }
 
-void Game::ai_update() {
+void 
+Game::ai_update() {
   herb1.ai_update();
 }
 
-void Game::render() {
+void 
+Game::render() {
 BeginDrawing();
 
   ClearBackground(LIGHTGRAY);
@@ -47,5 +52,6 @@ BeginDrawing();
 EndDrawing();
 }
 
-void Game::shutdown() {
+void 
+Game::shutdown() {
 }
