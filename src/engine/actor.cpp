@@ -1,6 +1,22 @@
 #include "actor.hpp"
 
-AActor::AActor(Game* game) 
-  : _game {game} {}
+Actor::Actor(Vector2 pos, Color c) 
+    : position {pos} 
+    , color {c} {}
 
-AActor::~AActor() {}
+Actor::~Actor() {
+  cleanup();
+}
+
+void
+Actor::update() {
+}
+
+void
+Actor::render() {
+  DrawCircleV(position, 15, color);
+}
+
+void
+Actor::cleanup() {
+}

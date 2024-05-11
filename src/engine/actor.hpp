@@ -2,29 +2,19 @@
 #define ACTOR_HPP
 
 #include <raylib.h>
+#include <raymath.h>
 
+struct Actor {
+  Vector2 position;
+  Color color;
+  
+  Actor(Vector2 p, Color c);
+  ~Actor();
 
-class Game;
+  void update();
+  void render();
 
-class AActor {
-protected:
-  Vector2 _position;
-  Color _color;
-  Game* _game;
-
-public:
-  AActor(Game* game);
-  virtual ~AActor();
-
-  virtual void update() = 0;
-  virtual void render() = 0;
-
-  // Optional abstract method for cleaning up actor resources.
-  virtual void cleanup() {};
-
-private:
-  // Init outside of contructor
-  virtual void init() {};
+  void cleanup();
 };
 
 #endif

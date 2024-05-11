@@ -2,27 +2,21 @@
 #define GAME_HPP
 
 #include <raylib.h>
-#include "agent.hpp"
+#include "std_includes.hpp"
+#include "engine/agent.hpp"
+#include "game/herbivore.hpp"
 
-class Agent;
 
-class Game {
-private:
-  unsigned int _win_w;
-  unsigned int _win_h;
-
+struct Game {
+  unsigned int win_w;
+  unsigned int win_h;
   // Time between a frame to another.
-  float _frame_delta;
-////////////////////// GAME SPECIFIC ATTRIBUTES ///////////////////////
-private:
-  Agent _wanderer;
-  Agent _wanderer2;
-  Agent _wanderer3;
-  Agent _wanderer4;
-  Agent _wanderer5;
-  Agent _wanderer6;
+  float frame_delta;
+
+///////////////// CUSTOM MEMBERS //////////////////////////////////////
+  Herbivore herb1;
 ///////////////////////////////////////////////////////////////////////
-public:
+
   Game(unsigned int w, unsigned int h);
   ~Game();
 
@@ -35,14 +29,7 @@ public:
   // Runs every frame.
   void update();      // Logic update.
   void render();      // Render update.
-  void ai_update(); // AI Update.
-
-  // Get the ms passed between frame
-  float get_frame_delta();
-
-  // Get game width and height
-  float get_game_width();
-  float get_game_height();
+  void ai_update();   // AI Update.
 
   // Called when the game is closed. For resources cleaning.
   void shutdown();
