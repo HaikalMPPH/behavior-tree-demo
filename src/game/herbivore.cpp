@@ -1,14 +1,14 @@
 #include "game/herbivore.hpp"
 #include "game/game.hpp"
+#include "std_includes.hpp"
+#
 
-Herbivore::Herbivore(Game* g, Vector2 p, Color c, float tr, float v)
-  : actor {Actor(p, c)}
-  , agent {Agent(tr)} 
-  , game {g}
-  , velocity {v}
-  , direction {0.0f, 0.0f}
-  , hunger {100.0f}
-  , hunger_decrement {1.0f}
+Herbivore::Herbivore(Game* g, Vector2 p, Color c, uint8_t tr, float v)
+  : _mov_actor {MovableActor(p, c, v)}
+  , _agent {Agent(tr)} 
+  , _game {g}
+  , _hunger {100.0f}
+  , _hunger_decrement {1.0f}
 {
   //Create actions
   create_action();
@@ -18,38 +18,34 @@ Herbivore::Herbivore(Game* g, Vector2 p, Color c, float tr, float v)
   create_behavior();
 }
 
-Herbivore::~Herbivore() {}
+Herbivore::~Herbivore() {
+}
 
 void
 Herbivore::update() {
   wrap_around();
   diminish_hunger();
-  std::cout << "Hunger: " << hunger << std::endl;
+  std::cout << "Hunger: " << _hunger << std::endl;
 }
 
 void
 Herbivore::ai_update() {
-  agent.update();
+  _agent.update();
 }
 
 void
 Herbivore::render() {
-  actor.render();
+  _mov_actor.render();
 }
 
 void
 Herbivore::create_action() {
-  move_to_direction = new Action([this](){
-    actor.color = RED;
+  _move_to_direction = new Action([this](){
     std::cout << "is moving..." << std::endl;
     static float ms = 0.0f;
     static float move_duration = (float)GetRandomValue(1, 4);
 
-    actor.position.x += 
-      direction.x * velocity * game->frame_delta * agent.tick_rate;
-
-    actor.position.y += 
-      direction.y * velocity * game->frame_delta * agent.tick_rate;
+    _mov_actor.move_to(_game->get_frame_delta() * _agent.get_tick_rate());
 
     if (ms >= move_duration) {
       ms = 0.0f;
@@ -59,22 +55,25 @@ Herbivore::create_action() {
       return BehaviorStatus::NodeSuccess;
     }
 
-    ms += game->frame_delta * agent.tick_rate;
+    ms += _game->get_frame_delta() * _agent.get_tick_rate();
 
     return BehaviorStatus::NodeRunning;
   });
 
-  set_random_directon = new Action([this](){
+  _set_random_directon = new Action([this](){
     std::cout << "finding random direction..." << std::endl;
-    direction.x = (float)GetRandomValue(-10, 10);
-    direction.y = (float)GetRandomValue(-10, 10);
-    direction = Vector2Normalize(direction);
+    _mov_actor.set_dir(
+        Vector2 {
+          (float)GetRandomValue(-10, 10),
+          (float)GetRandomValue(-10, 10)
+        }
+    );
 
     return BehaviorStatus::NodeSuccess;
   });
 
-  idle = new Action([this](){
-    actor.color = YELLOW;
+  _idle = new Action([this](){
+    _mov_actor.set_color(YELLOW);
     static float ms = 0.0f;
     static float wait_limit = (float)GetRandomValue(1, 4);
     std::cout << "is idling..." << std::endl;
@@ -85,7 +84,33 @@ Herbivore::create_action() {
       return BehaviorStatus::NodeSuccess;
     }
 
-    ms += game->frame_delta * agent.tick_rate;
+    ms += _game->get_frame_delta() * _agent.get_tick_rate();
+
+    return BehaviorStatus::NodeRunning;
+  });
+
+  _get_food_direction = new Action([this](){
+    _mov_actor.set_dir(
+      Vector2Subtract(
+        _game->_food.get_position(), 
+        _mov_actor.get_position()
+      )
+    );
+    return BehaviorStatus::NodeSuccess;
+  });
+
+  _move_and_eat = new Action([this](){
+    _mov_actor.move_to(_game->get_frame_delta() * _agent.get_tick_rate());
+    if (
+      // TODO - Find a way to tell if the agent have reached a
+      // destination with vector math.
+      // NOTE - Look at Vector2Distance function in raylib.
+      true
+    ) {
+      std::cout << "FOOOODDD!!!!" << std::endl;
+      _hunger = 100.0f;
+      return BehaviorStatus::NodeSuccess;
+    }
 
     return BehaviorStatus::NodeRunning;
   });
@@ -93,53 +118,81 @@ Herbivore::create_action() {
 
 void
 Herbivore::create_condition() {
-  is_hungry = new Condition([this](){
-    if (hunger <= hunger_threshold) {
+  _is_hungry = new Condition([this](){
+    if (_hunger <= _hunger_threshold) {
+      _mov_actor.set_color(BROWN);
       std::cout << "HUNGRY!! >:(" << std::endl;
-      actor.color = BROWN;
       return true;
     }
 
+    _mov_actor.set_color(RED);
     return false;
   });
 }
 
 void
 Herbivore::create_behavior() {
-  agent.btb = new BehaviorTreeBuilder();
-  agent.btb->root(new Selector())
-    ->composite(new Sequence())
-      ->decorator(new Invert())
-        ->condition(is_hungry)
-        ->end()
-      ->action(set_random_directon)
-      ->action(move_to_direction)
-      ->action(idle)
-      ->end()
-    ->composite(new Sequence())
-      ->condition(is_hungry);
+  _agent.set_btb(new BehaviorTreeBuilder());
 
-  agent.bt = agent.btb->create_tree();
+  _agent.get_btb()
+    ->root(new Selector())
+      ->composite(new Sequence())
+        ->decorator(new Invert())
+          ->condition(_is_hungry)
+          ->end()
+        ->action(_set_random_directon)
+        ->action(_move_to_direction)
+        ->action(_idle)
+        ->end()
+      ->composite(new Sequence())
+        ->condition(_is_hungry)
+        ->action(_get_food_direction)
+        ->action(_move_and_eat);
+
+  _agent.create_bt();
 }
 
 void
 Herbivore::wrap_around() {
   // wrapt around the screen
-  if (actor.position.y < 0.0f) {
-    actor.position.y = game->win_h;
+  if (_mov_actor.get_position().y < 0.0f) {
+    _mov_actor.set_position(
+      Vector2 {
+        _mov_actor.get_position().x,
+        _game->get_win_dimension().y
+      }
+    );
   }
-  if (actor.position.y > game->win_h) {
-    actor.position.y = 0.0f;
+  if (_mov_actor.get_position().y > _game->get_win_dimension().y) {
+    _mov_actor.set_position(
+      Vector2 {
+        _mov_actor.get_position().x,
+        0.0f
+      }
+    );
   }
-  if (actor.position.x < 0.0f) {
-    actor.position.x = game->win_w;
+
+  if (_mov_actor.get_position().x < 0.0f) {
+    _mov_actor.set_position(
+      Vector2 {
+        _game->get_win_dimension().x,
+        _mov_actor.get_position().y
+      }
+    );
   }
-  if (actor.position.x > game->win_w) {
-    actor.position.x = 0.0f;
+
+  if (_mov_actor.get_position().x > _game->get_win_dimension().x) {
+    _mov_actor.set_position(
+      Vector2 {
+        0.0f,
+        _mov_actor.get_position().y
+      }
+    );
   }
 }
 
 void
 Herbivore::diminish_hunger() {
-  hunger -= hunger_decrement * game->frame_delta * agent.tick_rate;
+  _hunger -= 
+    _hunger_decrement * _game->get_frame_delta() * _agent.get_tick_rate();
 }

@@ -2,10 +2,11 @@
 #include "game/game.hpp"
 #include <raymath.h>
 
-Agent::Agent(float tick_rate) 
-    : btb {nullptr} 
-    , bt {nullptr}
-    , tick_rate {tick_rate} {}
+Agent::Agent(uint8_t tick_rate) 
+    : _btb {nullptr} 
+    , _bt {nullptr}
+    , _tick_rate {tick_rate} 
+{}
 
 Agent::~Agent() {
   cleanup();
@@ -13,17 +14,37 @@ Agent::~Agent() {
 
 void
 Agent::update() {
-  if (bt != nullptr) {
-    bt->bt_update(tick_rate);
+  if (_bt != nullptr) {
+    _bt->bt_update(_tick_rate);
   }
 }
 
 void
 Agent::cleanup() {
-  if (btb != nullptr && bt != nullptr) {
-    delete bt;
-    delete btb;
-    bt = nullptr;
-    btb = nullptr;
+  if (_btb != nullptr && _bt != nullptr) {
+    delete _bt;
+    delete _btb;
+    _bt = nullptr;
+    _btb = nullptr;
   }
+}
+
+BehaviorTreeBuilder* 
+Agent::get_btb() {
+  return _btb;
+}
+
+void 
+Agent::set_btb(BehaviorTreeBuilder* btb) {
+  _btb = btb;
+}
+
+void 
+Agent::create_bt() {
+  _bt = _btb->create_tree();
+}
+
+uint8_t
+Agent::get_tick_rate() {
+  return _tick_rate;
 }

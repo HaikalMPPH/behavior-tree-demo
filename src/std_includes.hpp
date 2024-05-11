@@ -7,6 +7,7 @@
 #include <thread>
 #include <chrono>
 #include <cstdlib>
-#include <thread>
+#include <cmath>
+#include <cstdint>
 
 #endif

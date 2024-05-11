@@ -3,17 +3,25 @@
 
 #include "ai/ai.hpp"
 #include "actor.hpp"
+#include "std_includes.hpp"
 
-struct Agent {
-  BehaviorTreeBuilder* btb;
-  BehaviorTree* bt;
-  float tick_rate;
-
-  Agent(float tick_rate);
+class Agent {
+private:
+  BehaviorTreeBuilder* _btb;
+  BehaviorTree* _bt;
+  uint8_t _tick_rate;
+public:
+  Agent(uint8_t tick_rate);
   ~Agent();
 
   void cleanup();
   void update();
+
+  BehaviorTreeBuilder* get_btb();
+  void set_btb(BehaviorTreeBuilder* btb);
+  void create_bt();
+
+  uint8_t get_tick_rate();
 };
 
 #endif

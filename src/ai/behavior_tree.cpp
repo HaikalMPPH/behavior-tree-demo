@@ -16,7 +16,7 @@ void BehaviorTree::bt_update() {
   _root->tick();
 }
 
-void BehaviorTree::bt_update(float tick_rate) {
+void BehaviorTree::bt_update(uint8_t tick_rate) {
   if (_frame >= tick_rate) {
     _root->tick();
     _frame = 0;

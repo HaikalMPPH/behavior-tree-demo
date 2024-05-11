@@ -2,28 +2,31 @@
 #define HERBIVORE_HPP
 
 #include "engine/agent.hpp"
-#include "engine/actor.hpp"
+#include "engine/movable_actor.hpp"
 
-struct Game;
+class Game;
 
-struct Herbivore {
-  Actor actor;
-  Agent agent;
-  Game* game;
+class Herbivore {
+private:
+  MovableActor _mov_actor;
+  Agent _agent;
+  Game* _game;
 
-  float velocity;
-  Vector2 direction;
-  float hunger;
-  float hunger_decrement;
-  float hunger_threshold;
+  float _hunger;
+  float _hunger_decrement;
+  float _hunger_threshold;
 
-  Action* move_to_direction;
-  Action* idle;
-  Action* set_random_directon;
+  // These are deleted by the behavior tree dealloc_child() method.
+  Action* _move_to_direction;
+  Action* _idle;
+  Action* _set_random_directon;
+  Action* _get_food_direction;
+  Action* _move_and_eat;
 
-  Condition* is_hungry;
+  Condition* _is_hungry;
 
-  Herbivore(Game* g, Vector2 p, Color c, float tr, float v);
+public:
+  Herbivore(Game* g, Vector2 p, Color c, uint8_t tr, float v);
   ~Herbivore();
 
 /////////////////// CORE METHODS ////////////////////////////////////// 

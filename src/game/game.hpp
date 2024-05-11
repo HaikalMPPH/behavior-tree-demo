@@ -5,18 +5,21 @@
 #include "std_includes.hpp"
 #include "engine/agent.hpp"
 #include "game/herbivore.hpp"
+#include "game/food.hpp"
 
 
-struct Game {
-  unsigned int win_w;
-  unsigned int win_h;
+class Game {
+private:
+  unsigned int _win_w;
+  unsigned int _win_h;
   // Time between a frame to another.
-  float frame_delta;
+  float _frame_delta;
 
 ///////////////// CUSTOM MEMBERS //////////////////////////////////////
-  Herbivore herb1;
+  Herbivore _herb1;
 ///////////////////////////////////////////////////////////////////////
-
+public:
+  Food _food; // Temporary
   Game(unsigned int w, unsigned int h);
   ~Game();
 
@@ -30,6 +33,9 @@ struct Game {
   void update();      // Logic update.
   void render();      // Render update.
   void ai_update();   // AI Update.
+                      
+  float get_frame_delta();
+  Vector2 get_win_dimension();
 
   // Called when the game is closed. For resources cleaning.
   void shutdown();
