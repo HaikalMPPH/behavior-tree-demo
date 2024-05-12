@@ -9,19 +9,19 @@ class Agent {
 private:
   BehaviorTreeBuilder* _btb;
   BehaviorTree* _bt;
-  uint8_t _tick_rate;
+  uint8_t _tickRate;
 public:
-  Agent(uint8_t tick_rate);
+  Agent(uint8_t tickRate);
   ~Agent();
 
-  void cleanup();
-  void update();
+  void Cleanup();
+  void Update();
 
-  BehaviorTreeBuilder* get_btb();
-  void set_btb(BehaviorTreeBuilder* btb);
-  void create_bt();
+  BehaviorTreeBuilder* GetBTB();
+  void SetBTB(BehaviorTreeBuilder* btb);
+  void CreateBT();
 
-  uint8_t get_tick_rate();
+  uint8_t GetTickRate();
 };
 
 #endif

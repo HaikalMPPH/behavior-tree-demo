@@ -1,68 +1,67 @@
 #include "game/herbivore.hpp"
 #include "game/game.hpp"
 #include "std_includes.hpp"
-#
 
 Herbivore::Herbivore(Game* g, Vector2 p, Color c, uint8_t tr, float v)
-  : _mov_actor {MovableActor(p, c, v)}
+  : _movActor {MovableActor(p, c, v)}
   , _agent {Agent(tr)} 
   , _game {g}
+  , _debug {_movActor.GetActor()}
   , _hunger {100.0f}
-  , _hunger_decrement {1.0f}
+  , _hungerThreshold {1.0f}
 {
   //Create actions
-  create_action();
+  CreateAction();
   //Craete Condition
-  create_condition();
+  CreateCondition();
   // Create behvaior tree
-  create_behavior();
+  CreateBehavior();
 }
 
 Herbivore::~Herbivore() {
 }
 
 void
-Herbivore::update() {
-  wrap_around();
-  diminish_hunger();
-  std::cout << "Hunger: " << _hunger << std::endl;
+Herbivore::Update() {
+  WrapAround();
+  DiminishHunger();
+  _debug.ShowStatus();
 }
 
 void
-Herbivore::ai_update() {
-  _agent.update();
+Herbivore::AiUpdate() {
+  _agent.Update();
 }
 
 void
-Herbivore::render() {
-  _mov_actor.render();
+Herbivore::Render() {
+  _movActor.Render();
 }
 
 void
-Herbivore::create_action() {
-  _move_to_direction = new Action([this](){
-    std::cout << "is moving..." << std::endl;
+Herbivore::CreateAction() {
+  _moveToDirection = new Action([this](){
     static float ms = 0.0f;
-    static float move_duration = (float)GetRandomValue(1, 4);
+    static float moveDuration = (float)GetRandomValue(1, 4);
 
-    _mov_actor.move_to(_game->get_frame_delta() * _agent.get_tick_rate());
+    _movActor.MoveTo(_game->GetFrameDelta() * _agent.GetTickRate());
+    _debug.SetStatus("Moving: ", &ms);
 
-    if (ms >= move_duration) {
+    if (ms >= moveDuration) {
       ms = 0.0f;
       
       // get new random move duration
-      move_duration = (float)GetRandomValue(1, 4);    
+      moveDuration = (float)GetRandomValue(1, 4);    
       return BehaviorStatus::NodeSuccess;
     }
 
-    ms += _game->get_frame_delta() * _agent.get_tick_rate();
+    ms += _game->GetFrameDelta() * _agent.GetTickRate();
 
     return BehaviorStatus::NodeRunning;
   });
 
-  _set_random_directon = new Action([this](){
-    std::cout << "finding random direction..." << std::endl;
-    _mov_actor.set_dir(
+  _setRandomDirection = new Action([this](){
+    _movActor.SetDir(
         Vector2 {
           (float)GetRandomValue(-10, 10),
           (float)GetRandomValue(-10, 10)
@@ -73,39 +72,37 @@ Herbivore::create_action() {
   });
 
   _idle = new Action([this](){
-    _mov_actor.set_color(YELLOW);
     static float ms = 0.0f;
-    static float wait_limit = (float)GetRandomValue(1, 4);
-    std::cout << "is idling..." << std::endl;
+    static float waitLimit = (float)GetRandomValue(1, 4);
+    _debug.SetStatus("idling: ", &ms);
 
-    if (ms >= wait_limit) {
+    if (ms >= waitLimit) {
       ms = 0.0f;
-      wait_limit = (float)GetRandomValue(1, 4);
+      waitLimit = (float)GetRandomValue(1, 4);
       return BehaviorStatus::NodeSuccess;
     }
 
-    ms += _game->get_frame_delta() * _agent.get_tick_rate();
+    ms += _game->GetFrameDelta() * _agent.GetTickRate();
 
     return BehaviorStatus::NodeRunning;
   });
 
-  _get_food_direction = new Action([this](){
-    _mov_actor.set_dir(
+  _getFoodDirection = new Action([this](){
+    _movActor.SetDir(
       Vector2Subtract(
-        _game->_food.get_position(), 
-        _mov_actor.get_position()
+        _game->food.GetPosition(), 
+        _movActor.GetPosition()
       )
     );
     return BehaviorStatus::NodeSuccess;
   });
 
-  _move_and_eat = new Action([this](){
-    _mov_actor.move_to(_game->get_frame_delta() * _agent.get_tick_rate());
+  _moveAndEat = new Action([this](){
+    _movActor.MoveTo(_game->GetFrameDelta() * _agent.GetTickRate());
+    _debug.SetStatus("Moving to food: ", &_hunger);
+
     if (
-      // TODO - Find a way to tell if the agent have reached a
-      // destination with vector math.
-      // NOTE - Look at Vector2Distance function in raylib.
-      true
+      Vector2Distance(_movActor.GetPosition(), _game->food.GetPosition()) <= 1.f
     ) {
       std::cout << "FOOOODDD!!!!" << std::endl;
       _hunger = 100.0f;
@@ -117,82 +114,77 @@ Herbivore::create_action() {
 }
 
 void
-Herbivore::create_condition() {
-  _is_hungry = new Condition([this](){
-    if (_hunger <= _hunger_threshold) {
-      _mov_actor.set_color(BROWN);
+Herbivore::CreateCondition() {
+
+  // TODO - create a paralel AddComposite so it can simultaneously monitor
+  // conditions and running actions
+  _isHungry = new Condition([this](){
+    if (_hunger <= _hungerThreshold) {
+      _movActor.SetColor(BROWN);
       std::cout << "HUNGRY!! >:(" << std::endl;
       return true;
     }
 
-    _mov_actor.set_color(RED);
+    _movActor.SetColor(DARKGREEN);
     return false;
   });
 }
 
 void
-Herbivore::create_behavior() {
-  _agent.set_btb(new BehaviorTreeBuilder());
+Herbivore::CreateBehavior() {
+  _agent.SetBTB(new BehaviorTreeBuilder());
 
-  _agent.get_btb()
-    ->root(new Selector())
-      ->composite(new Sequence())
-        ->decorator(new Invert())
-          ->condition(_is_hungry)
-          ->end()
-        ->action(_set_random_directon)
-        ->action(_move_to_direction)
-        ->action(_idle)
-        ->end()
-      ->composite(new Sequence())
-        ->condition(_is_hungry)
-        ->action(_get_food_direction)
-        ->action(_move_and_eat);
+  _agent.GetBTB()
+    ->AddRoot(new Selector())
+      ->AddComposite(new Sequence())
+        ->AddDecorator(new Invert())
+          ->AddCondition(_isHungry)
+          ->End()
+        ->AddAction(_setRandomDirection)
+        ->AddAction(_moveToDirection)
+        ->AddAction(_idle)
+        ->End()
+      ->AddComposite(new Sequence())
+        ->AddCondition(_isHungry)
+        ->AddAction(_getFoodDirection)
+        ->AddAction(_moveAndEat);
 
-  _agent.create_bt();
+  _agent.CreateBT();
 }
 
 void
-Herbivore::wrap_around() {
+Herbivore::WrapAround() {
   // wrapt around the screen
-  if (_mov_actor.get_position().y < 0.0f) {
-    _mov_actor.set_position(
-      Vector2 {
-        _mov_actor.get_position().x,
-        _game->get_win_dimension().y
-      }
-    );
+  if (_movActor.GetPosition().y < 0.0f) {
+    _movActor.SetPosition({
+        _movActor.GetPosition().x,
+        _game->GetWinDimension().y
+      });
   }
-  if (_mov_actor.get_position().y > _game->get_win_dimension().y) {
-    _mov_actor.set_position(
-      Vector2 {
-        _mov_actor.get_position().x,
+  if (_movActor.GetPosition().y > _game->GetWinDimension().y) {
+    _movActor.SetPosition({
+        _movActor.GetPosition().x,
         0.0f
-      }
-    );
+    });
   }
 
-  if (_mov_actor.get_position().x < 0.0f) {
-    _mov_actor.set_position(
-      Vector2 {
-        _game->get_win_dimension().x,
-        _mov_actor.get_position().y
-      }
-    );
+  if (_movActor.GetPosition().x < 0.0f) {
+    _movActor.SetPosition({
+        _game->GetWinDimension().x,
+        _movActor.GetPosition().y
+    });
   }
 
-  if (_mov_actor.get_position().x > _game->get_win_dimension().x) {
-    _mov_actor.set_position(
-      Vector2 {
+  if (_movActor.GetPosition().x > _game->GetWinDimension().x) {
+    _movActor.SetPosition({
         0.0f,
-        _mov_actor.get_position().y
-      }
-    );
+        _movActor.GetPosition().y
+    });
   }
 }
 
 void
-Herbivore::diminish_hunger() {
+Herbivore::DiminishHunger() {
   _hunger -= 
-    _hunger_decrement * _game->get_frame_delta() * _agent.get_tick_rate();
+    _hungerThreshold * _game->GetFrameDelta() * _agent.GetTickRate();
 }

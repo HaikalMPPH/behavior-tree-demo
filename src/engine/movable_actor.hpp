@@ -12,20 +12,22 @@ public:
   MovableActor(Vector2 position, Color c, float velocity);
   ~MovableActor();
 
-  void render();
-  void update();
+  void Render();
+  void Update();
 
-  void move_to(Vector2 target, float frame_delta);
-  void move_to(float frame_delta);
+  void MoveTo(Vector2 target, float frameDelta);
+  void MoveTo(float frameDelta);
 
-  void set_dir(Vector2 dir);
+  void SetDir(Vector2 dir);
 
-  Vector2 get_position();
-  void set_position(Vector2 position);
-  void set_position(float x, float y);
+  Vector2 GetPosition();
+  void SetPosition(Vector2 position);
+  void SetPosition(float x, float y);
 
   // will be deleted soon
-  void set_color(Color c);
+  void SetColor(Color c);
+
+  Actor* GetActor();
 };
 
 #endif

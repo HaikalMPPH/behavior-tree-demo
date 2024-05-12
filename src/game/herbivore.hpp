@@ -3,45 +3,47 @@
 
 #include "engine/agent.hpp"
 #include "engine/movable_actor.hpp"
+#include "engine/debug.hpp"
 
 class Game;
 
 class Herbivore {
 private:
-  MovableActor _mov_actor;
+  MovableActor _movActor;
   Agent _agent;
   Game* _game;
+  Debug _debug;
 
   float _hunger;
-  float _hunger_decrement;
-  float _hunger_threshold;
+  float _hungerDecrement;
+  float _hungerThreshold;
 
   // These are deleted by the behavior tree dealloc_child() method.
-  Action* _move_to_direction;
+  Action* _moveToDirection;
   Action* _idle;
-  Action* _set_random_directon;
-  Action* _get_food_direction;
-  Action* _move_and_eat;
+  Action* _setRandomDirection;
+  Action* _getFoodDirection;
+  Action* _moveAndEat;
 
-  Condition* _is_hungry;
+  Condition* _isHungry;
 
 public:
   Herbivore(Game* g, Vector2 p, Color c, uint8_t tr, float v);
   ~Herbivore();
 
 /////////////////// CORE METHODS ////////////////////////////////////// 
-  void update();
-  void ai_update();
-  void render();
+  void Update();
+  void AiUpdate();
+  void Render();
 
 /////////////////// AI METHODS //////////////////////////////////////// 
-  void create_action();
-  void create_condition();
-  void create_behavior();
+  void CreateAction();
+  void CreateCondition();
+  void CreateBehavior();
 
 /////////////////// LOGIC METHODS ///////////////////////////////////// 
-  void wrap_around();
-  void diminish_hunger();
+  void WrapAround();
+  void DiminishHunger();
 };
 
 #endif

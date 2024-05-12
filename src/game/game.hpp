@@ -10,35 +10,38 @@
 
 class Game {
 private:
-  unsigned int _win_w;
-  unsigned int _win_h;
+  unsigned int _winW;
+  unsigned int _winH;
   // Time between a frame to another.
-  float _frame_delta;
+  float _frameDelta;
 
 ///////////////// CUSTOM MEMBERS //////////////////////////////////////
   Herbivore _herb1;
+  Herbivore _herb2;
+  Herbivore _herb3;
+  Herbivore _herb4;
 ///////////////////////////////////////////////////////////////////////
 public:
-  Food _food; // Temporary
-  Game(unsigned int w, unsigned int h);
+  Food food; // Temporary
+  Game(uint16_t w, uint16_t h);
   ~Game();
 
   // On initialization.
-  void init();
+  void Init();
 
   // Runs continuosly the update and render method.
-  void run();
+  void Run();
 
   // Runs every frame.
-  void update();      // Logic update.
-  void render();      // Render update.
-  void ai_update();   // AI Update.
+  void Update();      // Logic update.
+  void Render();      // Render update.
+  void AiUpdate();   // AI Update.
                       
-  float get_frame_delta();
-  Vector2 get_win_dimension();
+  float GetFrameDelta();
+  Vector2 GetWinDimension();
 
   // Called when the game is closed. For resources cleaning.
-  void shutdown();
+  void Shutdown();
 };
 
 #endif

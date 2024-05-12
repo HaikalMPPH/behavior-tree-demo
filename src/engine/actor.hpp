@@ -12,14 +12,14 @@ public:
   Actor(Vector2 p, Color c);
   ~Actor();
 
-  void update();
-  void render();
-  Vector2 get_position();
-  void set_color(Color c);
-  void set_position(Vector2 position);
-  void set_position(float x, float y);
+  void Update();
+  void Render();
+  Vector2 GetPosition();
+  void SetColor(Color c);
+  void SetPosition(Vector2 position);
+  void SetPosition(float x, float y);
 
-  void cleanup();
+  void Cleanup();
 };
 
 #endif

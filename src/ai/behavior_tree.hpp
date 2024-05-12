@@ -11,17 +11,17 @@ private:
 public:
   BehaviorTree();
   ~BehaviorTree();
-  void set_root(ABehavior* node);
-  ABehavior* get_root();
-  void bt_update();
+  void SetRoot(ABehavior* node);
+  ABehavior* GetRoot();
+  void BTUpdate();
 
   /*
-     Optional: tick the bt_update() for a certain rate. Usually ties to
-     game frame rate. Example: a tick_rate of 5 means it ticks every 5
+     Optional: tick the BTUpdate() for a certain rate. Usually ties to
+     game frame rate. Example: a tickRate of 5 means it ticks every 5
      frame.
   */
-  void bt_update(uint8_t tick_rate);
-  void dealloc_root();
+  void BTUpdate(uint8_t tickRate);
+  void DeallocRoot();
 };
 
 #endif

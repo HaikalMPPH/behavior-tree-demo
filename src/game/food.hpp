@@ -10,8 +10,8 @@ public:
   Food(Vector2 position, Color color);
   ~Food();
 
-  void render();
-  Vector2 get_position() { return _actor.get_position(); }
+  void Render();
+  Vector2 GetPosition() { return _actor.GetPosition(); }
 };
 
 #endif

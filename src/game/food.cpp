@@ -9,6 +9,6 @@ Food::~Food() {
 }
 
 void
-Food::render() {
-  _actor.render();
+Food::Render() {
+  _actor.Render();
 }

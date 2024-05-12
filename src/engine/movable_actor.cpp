@@ -10,52 +10,57 @@ MovableActor::MovableActor(
 MovableActor::~MovableActor() {}
 
 void
-MovableActor::move_to(Vector2 target, float frame_delta) {
+MovableActor::MoveTo(Vector2 target, float frameDelta) {
   _direction = Vector2Normalize(target);
 
-  _actor.set_position(
-    _actor.get_position().x + _direction.x * _velocity * frame_delta,
-    _actor.get_position().y + _direction.y * _velocity * frame_delta
+  _actor.SetPosition(
+    _actor.GetPosition().x + _direction.x * _velocity * frameDelta,
+    _actor.GetPosition().y + _direction.y * _velocity * frameDelta
   ); 
 }
 
-// if the direction is already set with set_dir()
+// if the direction is already set with SetDir()
 void
-MovableActor::move_to(float frame_delta) {
-  _actor.set_position(
-    _actor.get_position().x + _direction.x * _velocity * frame_delta,
-    _actor.get_position().y + _direction.y * _velocity * frame_delta
+MovableActor::MoveTo(float frameDelta) {
+  _actor.SetPosition(
+    _actor.GetPosition().x + _direction.x * _velocity * frameDelta,
+    _actor.GetPosition().y + _direction.y * _velocity * frameDelta
   ); 
 }
 
 void
-MovableActor::update() {
-  _actor.update();
+MovableActor::Update() {
+  _actor.Update();
 }
 void
-MovableActor::render() {
-  _actor.render();
+MovableActor::Render() {
+  _actor.Render();
 }
 
 void
-MovableActor::set_dir(Vector2 dir) {
+MovableActor::SetDir(Vector2 dir) {
   _direction = Vector2Normalize(dir);
 }
 
 Vector2 
-MovableActor::get_position() { 
-  return _actor.get_position();
+MovableActor::GetPosition() { 
+  return _actor.GetPosition();
 }
 
 void 
-MovableActor::set_position(Vector2 position) { 
-  _actor.set_position(position);
+MovableActor::SetPosition(Vector2 position) { 
+  _actor.SetPosition(position);
 }
 void 
-MovableActor::set_position(float x, float y) { 
-  _actor.set_position(x, y);
+MovableActor::SetPosition(float x, float y) { 
+  _actor.SetPosition(x, y);
 }
 void
-MovableActor::set_color(Color c) {
-  _actor.set_color(c);
+MovableActor::SetColor(Color c) {
+  _actor.SetColor(c);
+}
+
+Actor*
+MovableActor::GetActor() {
+  return &_actor;
 }

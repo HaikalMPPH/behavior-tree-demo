@@ -5,39 +5,39 @@ Actor::Actor(Vector2 pos, Color c)
   , _color {c} {}
 
 Actor::~Actor() {
-  cleanup();
+  Cleanup();
 }
 
 void
-Actor::update() {
+Actor::Update() {
 }
 
 void
-Actor::render() {
+Actor::Render() {
   DrawCircleV(_position, 15, _color);
 }
 
 void
-Actor::cleanup() {
+Actor::Cleanup() {
   // cleaning up resources
 }
 
 void
-Actor::set_position(Vector2 position) {
+Actor::SetPosition(Vector2 position) {
   _position = position;
 }
 
 void
-Actor::set_position(float x, float y) {
+Actor::SetPosition(float x, float y) {
   _position.x = x;
   _position.y = y;
 }
 void
-Actor::set_color(Color c) {
+Actor::SetColor(Color c) {
   _color = c;
 }
 
 Vector2
-Actor::get_position() {
+Actor::GetPosition() {
   return _position;
 }
