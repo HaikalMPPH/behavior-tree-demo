@@ -14,6 +14,8 @@ private:
   Game* _game;
   Debug _debug;
 
+  float _ms;
+  float _msLimit;
   float _hunger;
   float _hungerDecrement;
   float _hungerThreshold;
@@ -41,9 +43,10 @@ public:
   void CreateCondition();
   void CreateBehavior();
 
-/////////////////// LOGIC METHODS ///////////////////////////////////// 
+/////////////////// UPDATE METHODS //////////////////////////////////// 
   void WrapAround();
   void DiminishHunger();
+  void ResetMs();
 };
 
 #endif

@@ -6,7 +6,9 @@ Herbivore::Herbivore(Game* g, Vector2 p, Color c, uint8_t tr, float v)
   : _movActor {MovableActor(p, c, v)}
   , _agent {Agent(tr)} 
   , _game {g}
-  , _debug {_movActor.GetActor()}
+  , _debug {Debug(&_movActor)}
+  , _ms {0.0f}
+  , _msLimit {0.0f}
   , _hunger {100.0f}
   , _hungerThreshold {1.0f}
 {
@@ -26,6 +28,7 @@ Herbivore::Update() {
   WrapAround();
   DiminishHunger();
   _debug.ShowStatus();
+  _ms += _game->GetFrameDelta();
 }
 
 void
@@ -41,21 +44,13 @@ Herbivore::Render() {
 void
 Herbivore::CreateAction() {
   _moveToDirection = new Action([this](){
-    static float ms = 0.0f;
-    static float moveDuration = (float)GetRandomValue(1, 4);
-
     _movActor.MoveTo(_game->GetFrameDelta() * _agent.GetTickRate());
-    _debug.SetStatus("Moving: ", &ms);
+    _debug.SetStatus("Moving: ", &_ms);
 
-    if (ms >= moveDuration) {
-      ms = 0.0f;
-      
-      // get new random move duration
-      moveDuration = (float)GetRandomValue(1, 4);    
+    if (_ms >= _msLimit) {
+      ResetMs();
       return BehaviorStatus::NodeSuccess;
     }
-
-    ms += _game->GetFrameDelta() * _agent.GetTickRate();
 
     return BehaviorStatus::NodeRunning;
   });
@@ -72,17 +67,11 @@ Herbivore::CreateAction() {
   });
 
   _idle = new Action([this](){
-    static float ms = 0.0f;
-    static float waitLimit = (float)GetRandomValue(1, 4);
-    _debug.SetStatus("idling: ", &ms);
-
-    if (ms >= waitLimit) {
-      ms = 0.0f;
-      waitLimit = (float)GetRandomValue(1, 4);
+    _debug.SetStatus("Idling: ", &_ms);
+    if (_ms >= _msLimit) {
+      ResetMs();
       return BehaviorStatus::NodeSuccess;
     }
-
-    ms += _game->GetFrameDelta() * _agent.GetTickRate();
 
     return BehaviorStatus::NodeRunning;
   });
@@ -187,4 +176,10 @@ void
 Herbivore::DiminishHunger() {
   _hunger -= 
     _hungerThreshold * _game->GetFrameDelta() * _agent.GetTickRate();
+}
+
+void
+Herbivore::ResetMs() {
+  _ms = 0.0f;
+  _msLimit = static_cast<float>(GetRandomValue(0, 4));
 }

@@ -2,17 +2,17 @@
 #define DEBUG_HPP
 
 #include <raylib.h>
-#include "engine/actor.hpp"
+#include "engine/movable_actor.hpp"
 
-class Actor;
+class MovableActor;
 
 class Debug {
 private:
   const char* _statusMessage;
   float* _statusVal;
-  Actor* _refActor;
+  MovableActor* _refMovActor;
 public:
-  Debug(Actor* refActor);
+  Debug(MovableActor* refMovActor);
   ~Debug();
 
   void ShowStatus();
